@@ -19,7 +19,7 @@ anions = [
 
 possible_dual_type = ['P']
 
-scheme = ['avg', 'max', 'min', 'range', 'avg_root3', 'dev', 'ratio_cation', 'ratio_anion', 'ratio_cation_to_anion']
+scheme = ['avg', 'max', 'min', 'range', 'avg_scaled_ratio', 'dev', 'ratio_cation', 'ratio_anion', 'ratio_cation_to_anion']
 
 def apply_scheme(molecules_, target_, descriptor='data/element_properties/features.csv'):
     molecules = list(molecules_)
@@ -120,12 +120,13 @@ def apply_scheme(molecules_, target_, descriptor='data/element_properties/featur
             dev_ = sum([abs(get_features(ratio[0][n], features)-avg).dot((ratio[1][n]/total_ratio)) for n in range(len(ratio[0]))])
             all_feature_values = all_feature_values + list(dev_)
             list_schemes.append('dev')
-        if 'avg_root3' in scheme:
-            root3_ratio = [x**(1/3) for x in ratio[1]]
-            total = sum(root3_ratio)
-            avg_root3 = sum([get_features(ratio[0][n], features).dot((root3_ratio[n]/total)) for n in range(len(ratio[0]))])
-            all_feature_values = all_feature_values + list(avg_root3)
-            list_schemes.append('avg_root3')
+        if 'avg_scaled_ratio' in scheme:
+            x_max = max(ratio[1])
+            scaled_ratio = [x+0.5*(x_max-x) for x in ratio[1]]
+            total = sum(scaled_ratio)
+            avg_scaled_ratio = sum([get_features(ratio[0][n], features).dot((scaled_ratio[n]/total)) for n in range(len(ratio[0]))])
+            all_feature_values = all_feature_values + list(avg_scaled_ratio)
+            list_schemes.append('avg_scaled_ratio')
         list_element_value = np.array([get_features(ratio[0][n], features) for n in range(len(ratio[0]))]).T
         max_ = [max(n) for n in list_element_value]
         min_ = [min(n) for n in list_element_value]
