@@ -19,7 +19,7 @@ anions = [
 
 possible_dual_type = ['P']
 
-schemes = ['avg', 'max', 'min', 'range', 'avg_transformed', 'dev', 'ratio_cation', 'ratio_anion', 'ratio_cation_to_anion']
+schemes=['avg','dev', 'max','min','range']
 
 def apply_scheme(molecules_, target_, schemes=schemes, descriptor='data/element_properties/features.csv', lambda_transform=-2):
     molecules = list(molecules_)
@@ -140,6 +140,19 @@ def apply_scheme(molecules_, target_, schemes=schemes, descriptor='data/element_
                 dev_ = sum([list_dev_yj[n].dot((yj_ratio[n]/total_yj_ratio)) for n in range(len(list_dev_yj))])
                 all_feature_values = all_feature_values + list(dev_)
                 list_schemes.append('dev_yj')
+
+        if 'avg_power' in schemes or 'dev_power' in schemes:
+            power_ratio = [x**lambda_transform for x in ratio[1]]
+            total_power_ratio = sum(power_ratio)
+            avg_power = sum([get_features(ratio[0][n], features).dot((power_ratio[n]/total_power_ratio)) for n in range(len(ratio[0]))])
+            list_dev_power = [abs(get_features(ratio[0][n], features)-avg_power) for n in range(len(ratio[0]))]
+            if 'avg_power' in schemes:
+                all_feature_values = all_feature_values + list(avg_power)
+                list_schemes.append('avg_power')
+            if 'dev_power' in schemes:
+                dev_ = sum([list_dev_power[n].dot((power_ratio[n]/total_power_ratio)) for n in range(len(list_dev_power))])
+                all_feature_values = all_feature_values + list(dev_)
+                list_schemes.append('dev_power')
 
         list_element_value = np.array([get_features(ratio[0][n], features) for n in range(len(ratio[0]))]).T
         max_ = [max(n) for n in list_element_value]

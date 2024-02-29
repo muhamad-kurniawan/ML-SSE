@@ -12,9 +12,9 @@ class TECRF:
     def __init__(self, parameters='default'):
         param_default = {
                 'rf1':[None, 300],
-                'rf2':[-2.2, 150],
-                'rf3':[-2.1, 150],
-                'rf4':[-2, 150],
+                'rf2':[0.3, 150],
+                'rf3':[0.35, 150],
+                'rf4':[0.4, 150],
             }
         if parameters=='default':
             self.params = param_default
@@ -27,7 +27,7 @@ class TECRF:
         if lambda_==None:
             schemes=['avg','dev', 'max','min','range']
         else:
-            schemes=['avg_yj','dev_yj', 'max','min','range']
+            schemes=['avg_power','dev_power', 'max','min','range']
         return fzn.apply_scheme(train_formulas, train_target, schemes=schemes, lambda_transform=lambda_)
     
     def train(self, train, val):
@@ -45,6 +45,9 @@ class TECRF:
         for n in range(len(self.lambdas)):
 #             reg = RandomForestRegressor(n_estimators=self.n_estimators_[n], bootstrap=False)
             reg = RandomForestRegressor(random_state = 1, n_estimators= self.n_estimators_[n], min_samples_split= 5, min_samples_leaf= 2, max_features= 'sqrt', max_depth= 50, bootstrap= False)
+            reg = RandomForestRegressor(random_state = 1, n_estimators= self.n_estimators_[n], min_samples_split= 5, min_samples_leaf= 3, max_features= 'sqrt', max_depth= 50, bootstrap= False)
+
+            # reg = RandomForestRegressor(random_state = 1, n_estimators= self.n_estimators_[n], max_features= 'sqrt', max_depth= 25, bootstrap= False)
             # reg = RandomForestRegressor(random_state = 1, n_estimators= self.n_estimators_[n], min_samples_split= 5, min_samples_leaf= 2, max_depth= 50, bootstrap= True)
 
             X_train, y_train, formulas_train = self.feature_engineering(train_formulas, train_targets, lambda_=self.lambdas[n])
@@ -86,7 +89,7 @@ class TECRF:
         # self.weights = [1]*len(errors_flattened)
 
         # self.weights = scipy.special.softmax(errors_flattened)
-        print(self.weights)
+        # print(self.weights)
 
     def predict(self, data):
         formulas = data['formula']
@@ -106,6 +109,5 @@ class TECRF:
         print(np.array(preds_flattened).T.shape)
         print(len(self.weights))
         final_pred = [np.average(x, weights=self.weights) for x in np.array(preds_flattened).T]
-        # final_pred = [np.average(x) for x in np.array(preds_flattened).T]
         
         return final_pred
