@@ -1,1 +1,1 @@
-
+How to cite: M. Kurniawan, M.H. Alfaruqi, A.N. Fahri, S. Lee, J. Kim, Unveiling potential lithium ionic conductors through machine learning and atomic simulation approaches, Journal of Physics and Chemistry of Solids, In Press
